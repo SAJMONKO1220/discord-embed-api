@@ -15,7 +15,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Route to generate an embed
 app.post('/api/generate-embed', (req, res) => {
-    const { title, description, color, imageUrl, authorName } = req.body;
+    const { title, description, color, imageUrl } = req.body;
 
     // Validate the request body
     if (!title || !description || !color) {
@@ -27,8 +27,7 @@ app.post('/api/generate-embed', (req, res) => {
         title: sanitizeText(title),
         description: sanitizeText(description),
         color: parseInt(color, 10),
-        ...(imageUrl && { image: { url: sanitizeText(imageUrl) } }), // Include image only if imageUrl is provided
-        ...(authorName && { author: { name: sanitizeText(authorName) } }) // Include author if provided
+        ...(imageUrl && { image: { url: sanitizeText(imageUrl) } }) // Include image only if imageUrl is provided
     };
 
     // Generate a unique filename for the HTML file
@@ -41,15 +40,10 @@ app.post('/api/generate-embed', (req, res) => {
 <html>
 <head>
     <title>Discord Embed</title>
-    <meta property="og:title" content="${embed.title}" />
-    <meta property="og:description" content="${embed.description}" />
-    <meta property="og:image" content="${embed.image ? embed.image.url : ''}" />
-    <meta property="og:color" content="#${embed.color.toString(16)}" />
 </head>
 <body>
     <div style="border: 1px solid #${embed.color.toString(16)}; padding: 10px; border-radius: 5px; width: 300px;">
-        ${embed.author ? `<div style="font-weight: bold; color: #${embed.color.toString(16)};">${embed.author.name}</div>` : ''}
-        <h3 style="margin: 0; pointer-events: none;">${embed.title}</h3>
+        <h3>${embed.title}</h3>
         <p>${embed.description}</p>
         ${embed.image ? `<img src="${embed.image.url}" alt="Image" style="max-width: 100%;">` : ''}
     </div>
@@ -62,9 +56,8 @@ app.post('/api/generate-embed', (req, res) => {
             return res.status(500).json({ error: 'Error writing file' });
         }
 
-        // Return the full URL to access the HTML file
-        const fullUrl = `${req.protocol}://${req.get('host')}/${fileName}`;
-        res.json({ url: fullUrl });
+        // Return the URL to access the HTML file
+        res.json({ url: `/${fileName}` });
     });
 });
 
