@@ -10,7 +10,7 @@ app.use(express.static('public'));
 
 // Handle POST request to generate embed
 app.post('/api/generate-embed', (req, res) => {
-    const { title, description, color, author, image } = req.body;
+    const { title, description, color, author, fields, image } = req.body;
 
     // Validate required fields
     if (!title || !description || !color) {
@@ -20,7 +20,17 @@ app.post('/api/generate-embed', (req, res) => {
     // Generate a unique ID for the embed
     const id = uuid.v4();
 
-    // Create HTML content with meta tags for Discord
+    // Generate HTML content with meta tags for Discord
+    let fieldsHtml = '';
+    if (fields && Array.isArray(fields)) {
+        fieldsHtml = fields.map(field => `
+            <div class="embed-field">
+                <div class="embed-field-title">${field.name}</div>
+                <div class="embed-field-value">${field.value}</div>
+            </div>
+        `).join('');
+    }
+
     let htmlContent = `
 <!DOCTYPE html>
 <html lang="en">
@@ -42,6 +52,7 @@ app.post('/api/generate-embed', (req, res) => {
             padding: 10px;
             background-color: #f9f9f9;
             color: #333;
+            font-family: Arial, sans-serif;
         }
         .embed-header {
             font-weight: bold;
@@ -56,6 +67,12 @@ app.post('/api/generate-embed', (req, res) => {
             border-radius: 5px;
             margin-top: 10px;
         }
+        .embed-field {
+            margin-top: 10px;
+        }
+        .embed-field-title {
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -64,6 +81,7 @@ app.post('/api/generate-embed', (req, res) => {
         <div class="embed-body">${description}</div>
         ${author ? `<div class="embed-author">Author: ${author}</div>` : ''}
         ${image ? `<img src="${image}" class="embed-image" alt="Embed Image"/>` : ''}
+        ${fieldsHtml}
     </div>
 </body>
 </html>
