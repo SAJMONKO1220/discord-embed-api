@@ -17,22 +17,55 @@ app.post('/api/generate-embed', (req, res) => {
     // Generate a unique ID for the embed
     const id = uuid.v4();
 
-    // Create the JSON content
-    const embedData = {
-        title,
-        description,
-        color,
-        author: author || null,
-        image: image || null
-    };
+    // Create HTML content
+    let htmlContent = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Embed</title>
+    <style>
+        .embed {
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+        .embed-header {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .embed-author {
+            font-style: italic;
+            margin-top: 5px;
+        }
+        .embed-image {
+            max-width: 100%;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="embed">
+        <div class="embed-header">${title}</div>
+        <div class="embed-body">${description}</div>
+        ${author ? `<div class="embed-author">Author: ${author}</div>` : ''}
+        ${image ? `<img src="${image}" class="embed-image" alt="Embed Image"/>` : ''}
+    </div>
+</body>
+</html>
+    `;
 
-    // Write the JSON data to a file
-    const filePath = path.join(__dirname, 'public', `${id}.json`);
-    fs.writeFile(filePath, JSON.stringify(embedData, null, 2), (err) => {
+    // Write the HTML data to a file
+    const filePath = path.join(__dirname, 'public', `${id}.html`);
+    fs.writeFile(filePath, htmlContent, (err) => {
         if (err) {
             return res.status(500).json({ error: 'Failed to save embed data' });
         }
-        const fileUrl = `https://discord-embed-api-6bx7.onrender.com/${id}.json`;
+        const fileUrl = `https://discord-embed-api-6bx7.onrender.com/${id}.html`;
         res.json({ url: fileUrl });
     });
 });
