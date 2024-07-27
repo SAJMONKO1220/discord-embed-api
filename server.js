@@ -1,12 +1,21 @@
 const express = require('express');
+const fs = require('fs');
+const path = require('path');
+const { v4: uuidv4 } = require('uuid'); // To generate unique identifiers
 const app = express();
 const port = process.env.PORT || 10000;
 
-// Base URL for your API
-const BASE_URL = 'https://discord-embed-api-6bx7.onrender.com';
+// Directory to save HTML files
+const publicDir = path.join(__dirname, 'public');
+
+// Ensure the public directory exists
+if (!fs.existsSync(publicDir)) {
+    fs.mkdirSync(publicDir);
+}
 
 // Middleware to parse JSON bodies
 app.use(express.json());
+app.use(express.static(publicDir));
 
 // API endpoint to generate embeds
 app.post('/api/generate-embed', (req, res) => {
@@ -17,27 +26,39 @@ app.post('/api/generate-embed', (req, res) => {
         return res.status(400).json({ error: 'All fields are required' });
     }
 
-    // Basic embed object
-    const embed = {
-        title: title,
-        description: description,
-        color: color,
-        author: {
-            name: author || 'Default Author',
-            url: 'https://example.com', // Example URL; remove if not needed
-            icon_url: 'https://example.com/icon.png' // Example icon URL; remove if not needed
-        },
-        image: image ? { url: image } : undefined
-    };
+    // Generate a unique identifier for the file
+    const uniqueId = uuidv4();
+    const filePath = path.join(publicDir, `${uniqueId}.html`);
 
-    // Generate the URL for the embed (assuming you want to return the URL that generates the embed)
-    const embedUrl = `${BASE_URL}/api/generate-embed?title=${encodeURIComponent(title)}&description=${encodeURIComponent(description)}&color=${color}&author=${encodeURIComponent(author || '')}&image=${encodeURIComponent(image || '')}`;
+    // Create HTML content
+    const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Embed</title>
+        </head>
+        <body>
+            <div>
+                <h1>${title}</h1>
+                <p>${description}</p>
+                <p style="color:#${color.toString(16)}">Color</p>
+                ${author ? `<p>Author: ${author}</p>` : ''}
+                ${image ? `<img src="${image}" alt="Embed Image" />` : ''}
+            </div>
+        </body>
+        </html>
+    `;
 
-    // Return the full URL and the embed object
-    res.json({
-        message: 'Embed generated successfully',
-        url: embedUrl,
-        embed: embed
+    // Save the HTML file
+    fs.writeFile(filePath, htmlContent, (err) => {
+        if (err) {
+            console.error('Error writing file:', err);
+            return res.status(500).json({ error: 'Internal server error' });
+        }
+
+        // Return the URL of the generated HTML file
+        const fileUrl = `${req.protocol}://${req.get('host')}/${uniqueId}.html`;
+        res.json({ url: fileUrl });
     });
 });
 
