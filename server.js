@@ -56,8 +56,9 @@ app.post('/api/generate-embed', (req, res) => {
             return res.status(500).json({ error: 'Error writing file' });
         }
 
-        // Return the URL to access the HTML file
-        res.json({ url: `/${fileName}` });
+        // Return the full URL to access the HTML file
+        const fullUrl = `${req.protocol}://${req.get('host')}/${fileName}`;
+        res.json({ url: fullUrl });
     });
 });
 
