@@ -15,7 +15,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Route to generate an embed
 app.post('/api/generate-embed', (req, res) => {
-    const { title, description, color, imageUrl } = req.body;
+    const { title, description, color, imageUrl, authorName } = req.body;
 
     // Validate the request body
     if (!title || !description || !color) {
@@ -27,7 +27,8 @@ app.post('/api/generate-embed', (req, res) => {
         title: sanitizeText(title),
         description: sanitizeText(description),
         color: parseInt(color, 10),
-        ...(imageUrl && { image: { url: sanitizeText(imageUrl) } }) // Include image only if imageUrl is provided
+        ...(imageUrl && { image: { url: sanitizeText(imageUrl) } }), // Include image only if imageUrl is provided
+        ...(authorName && { author: { name: sanitizeText(authorName) } }) // Include author if provided
     };
 
     // Generate a unique filename for the HTML file
@@ -47,6 +48,7 @@ app.post('/api/generate-embed', (req, res) => {
 </head>
 <body>
     <div style="border: 1px solid #${embed.color.toString(16)}; padding: 10px; border-radius: 5px; width: 300px;">
+        ${embed.author ? `<div style="font-weight: bold; color: #${embed.color.toString(16)};">${embed.author.name}</div>` : ''}
         <h3 style="margin: 0; pointer-events: none;">${embed.title}</h3>
         <p>${embed.description}</p>
         ${embed.image ? `<img src="${embed.image.url}" alt="Image" style="max-width: 100%;">` : ''}
