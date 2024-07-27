@@ -1,21 +1,10 @@
 const express = require('express');
-const fs = require('fs');
-const path = require('path');
-const { v4: uuidv4 } = require('uuid'); // To generate unique identifiers
+const { v4: uuidv4 } = require('uuid');
 const app = express();
 const port = process.env.PORT || 10000;
 
-// Directory to save HTML files
-const publicDir = path.join(__dirname, 'public');
-
-// Ensure the public directory exists
-if (!fs.existsSync(publicDir)) {
-    fs.mkdirSync(publicDir);
-}
-
 // Middleware to parse JSON bodies
 app.use(express.json());
-app.use(express.static(publicDir));
 
 // API endpoint to generate embeds
 app.post('/api/generate-embed', (req, res) => {
@@ -26,39 +15,37 @@ app.post('/api/generate-embed', (req, res) => {
         return res.status(400).json({ error: 'All fields are required' });
     }
 
+    // Create embed object
+    const embed = {
+        title: title,
+        description: description,
+        color: color,
+        author: author ? { name: author } : undefined,
+        image: image ? { url: image } : undefined
+    };
+
     // Generate a unique identifier for the file
     const uniqueId = uuidv4();
-    const filePath = path.join(publicDir, `${uniqueId}.html`);
 
-    // Create HTML content
-    const htmlContent = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>Embed</title>
-        </head>
-        <body>
-            <div>
-                <h1>${title}</h1>
-                <p>${description}</p>
-                <p style="color:#${color.toString(16)}">Color</p>
-                ${author ? `<p>Author: ${author}</p>` : ''}
-                ${image ? `<img src="${image}" alt="Embed Image" />` : ''}
-            </div>
-        </body>
-        </html>
-    `;
+    // Return JSON data including the URL to use with Discord
+    res.json({
+        url: `https://discord-embed-api-6bx7.onrender.com/api/embed/${uniqueId}`,
+        embed: embed
+    });
+});
 
-    // Save the HTML file
-    fs.writeFile(filePath, htmlContent, (err) => {
-        if (err) {
-            console.error('Error writing file:', err);
-            return res.status(500).json({ error: 'Internal server error' });
-        }
+// Endpoint to return embed JSON for testing
+app.get('/api/embed/:id', (req, res) => {
+    const { id } = req.params;
 
-        // Return the URL of the generated HTML file
-        const fileUrl = `${req.protocol}://${req.get('host')}/${uniqueId}.html`;
-        res.json({ url: fileUrl });
+    // Return sample embed data
+    // You should use your own logic to fetch embed data based on ID if you store it
+    res.json({
+        title: "Sample Title",
+        description: "Sample Description",
+        color: 16711680,
+        author: { name: "Sample Author" },
+        image: { url: "https://example.com/image.png" }
     });
 });
 
