@@ -40,6 +40,10 @@ app.post('/api/generate-embed', (req, res) => {
 <html>
 <head>
     <title>Discord Embed</title>
+    <meta property="og:title" content="${embed.title}" />
+    <meta property="og:description" content="${embed.description}" />
+    <meta property="og:image" content="${embed.image ? embed.image.url : ''}" />
+    <meta property="og:color" content="#${embed.color.toString(16)}" />
 </head>
 <body>
     <div style="border: 1px solid #${embed.color.toString(16)}; padding: 10px; border-radius: 5px; width: 300px;">
