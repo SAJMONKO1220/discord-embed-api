@@ -44,6 +44,14 @@ app.post('/api/generate-embed', (req, res) => {
     <meta property="og:author" content="${author || 'Unknown'}">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://discord-embed-api-6bx7.onrender.com/${id}.html">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="${title}">
+    <meta name="twitter:description" content="${description}">
+    <meta name="twitter:image" content="${image || 'https://example.com/default-image.png'}">
+    <meta name="twitter:site" content="@your_twitter_handle">
+    <meta name="twitter:creator" content="@your_twitter_handle">
+
     <title>${title}</title>
     <style>
         .embed {
