@@ -1,72 +1,47 @@
 const express = require('express');
-const bodyParser = require('body-parser');
-const path = require('path');
-const fs = require('fs');
-
 const app = express();
-const PORT = process.env.PORT || 10000;
+const port = process.env.PORT || 10000;
 
-// Middleware
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+// Base URL for your API
+const BASE_URL = 'https://discord-embed-api-6bx7.onrender.com';
 
-// Serve static files from the 'public' directory
-app.use(express.static(path.join(__dirname, 'public')));
+// Middleware to parse JSON bodies
+app.use(express.json());
 
-// Route to generate an embed
+// API endpoint to generate embeds
 app.post('/api/generate-embed', (req, res) => {
-    const { title, description, color, imageUrl } = req.body;
+    const { title, description, color, author, image } = req.body;
 
-    // Validate the request body
+    // Validate required fields
     if (!title || !description || !color) {
-        return res.status(400).json({ error: 'Title, description, and color are required' });
+        return res.status(400).json({ error: 'All fields are required' });
     }
 
-    // Create the embed object
+    // Basic embed object
     const embed = {
-        title: sanitizeText(title),
-        description: sanitizeText(description),
-        color: parseInt(color, 10),
-        ...(imageUrl && { image: { url: sanitizeText(imageUrl) } }) // Include image only if imageUrl is provided
+        title: title,
+        description: description,
+        color: color,
+        author: {
+            name: author || 'Default Author',
+            url: 'https://example.com', // Example URL; remove if not needed
+            icon_url: 'https://example.com/icon.png' // Example icon URL; remove if not needed
+        },
+        image: image ? { url: image } : undefined
     };
 
-    // Generate a unique filename for the HTML file
-    const fileName = `${Date.now()}.html`;
-    const filePath = path.join(__dirname, 'public', fileName);
+    // Generate the URL for the embed (assuming you want to return the URL that generates the embed)
+    const embedUrl = `${BASE_URL}/api/generate-embed?title=${encodeURIComponent(title)}&description=${encodeURIComponent(description)}&color=${color}&author=${encodeURIComponent(author || '')}&image=${encodeURIComponent(image || '')}`;
 
-    // Create HTML content for the embed
-    const htmlContent = `
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Discord Embed</title>
-</head>
-<body>
-    <div style="border: 1px solid #${embed.color.toString(16)}; padding: 10px; border-radius: 5px; width: 300px;">
-        <h3>${embed.title}</h3>
-        <p>${embed.description}</p>
-        ${embed.image ? `<img src="${embed.image.url}" alt="Image" style="max-width: 100%;">` : ''}
-    </div>
-</body>
-</html>`;
-
-    // Write the HTML content to a file
-    fs.writeFile(filePath, htmlContent, (err) => {
-        if (err) {
-            return res.status(500).json({ error: 'Error writing file' });
-        }
-
-        // Return the URL to access the HTML file
-        res.json({ url: `/${fileName}` });
+    // Return the full URL and the embed object
+    res.json({
+        message: 'Embed generated successfully',
+        url: embedUrl,
+        embed: embed
     });
 });
 
-// Sanitize text to avoid unwanted HTML or Markdown
-function sanitizeText(text) {
-    return text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-}
-
 // Start the server
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+app.listen(port, () => {
+    console.log(`Server is running on port ${port}`);
 });
