@@ -40,11 +40,12 @@ app.post('/api/generate-embed', (req, res) => {
     <meta property="og:title" content="${title}">
     <meta property="og:description" content="${description}">
     <meta property="og:image" content="${image || 'https://example.com/default-image.png'}">
-    <meta property="og:color" content="#${color.toString(16)}">
-    <meta property="og:author" content="${author || 'Unknown'}">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://discord-embed-api-6bx7.onrender.com/${id}.html">
+    <meta property="og:author" content="${author || 'Unknown'}">
+    <meta property="og:color" content="#${color.toString(16)}">
 
+    <!-- Additional Meta Tags for Twitter Cards -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="${title}">
     <meta name="twitter:description" content="${description}">
@@ -61,6 +62,7 @@ app.post('/api/generate-embed', (req, res) => {
             background-color: #f9f9f9;
             color: #333;
             font-family: Arial, sans-serif;
+            max-width: 500px;
         }
         .embed-header {
             font-weight: bold;
