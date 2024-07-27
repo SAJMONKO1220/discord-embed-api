@@ -47,7 +47,7 @@ app.post('/api/generate-embed', (req, res) => {
 </head>
 <body>
     <div style="border: 1px solid #${embed.color.toString(16)}; padding: 10px; border-radius: 5px; width: 300px;">
-        <h3>${embed.title}</h3>
+        <h3 style="margin: 0;">${embed.title}</h3>
         <p>${embed.description}</p>
         ${embed.image ? `<img src="${embed.image.url}" alt="Image" style="max-width: 100%;">` : ''}
     </div>
