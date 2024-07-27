@@ -1,5 +1,3 @@
-// server.js
-
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
@@ -9,7 +7,7 @@ const PORT = process.env.PORT || 3000;
 // Middleware to parse JSON bodies
 app.use(express.json());
 
-// Serve static files
+// Serve static files from the 'public' directory
 app.use(express.static('public'));
 
 // Endpoint to create an embed and return a URL
@@ -31,8 +29,8 @@ app.post('/api/generate-embed', (req, res) => {
         <meta property="og:title" content="${title}" />
         <meta property="og:description" content="${description}" />
         <meta property="og:type" content="website" />
-        <meta property="og:image" content="https://example.com/image.png" /> <!-- Add a relevant image URL -->
-        <meta property="og:url" content="https://yourdomain.com/${filename}" />
+        <meta property="og:image" content="https://example.com/image.png" />
+        <meta property="og:url" content="https://discord-embed-api-6bx7.onrender.com/${filename}" />
     </head>
     <body>
         <h1>${title}</h1>
@@ -49,7 +47,7 @@ app.post('/api/generate-embed', (req, res) => {
         }
 
         // Return the URL to the generated page
-        res.json({ url: `https://yourdomain.com/${filename}` });
+        res.json({ url: `https://discord-embed-api-6bx7.onrender.com/${filename}` });
     });
 });
 
