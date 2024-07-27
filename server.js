@@ -32,6 +32,8 @@ app.post('/api/generate-embed', (req, res) => {
     <meta property="og:image" content="${image || 'https://example.com/default-image.png'}">
     <meta property="og:color" content="#${color.toString(16)}">
     <meta property="og:author" content="${author || 'Unknown'}">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://discord-embed-api-6bx7.onrender.com/${id}.html">
     <title>${title}</title>
     <style>
         .embed {
